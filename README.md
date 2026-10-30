@@ -104,7 +104,7 @@ Stated rather than left to be discovered:
 
 Cut on 2026-10-08 from a previous client's repository — its method, with
 none of its product — under
-[the founding brief](briefs/2026-10-08-product-ops-base.md). That client stays
+[the founding brief](docs/template-history/2026-10-08-product-ops-base.md). That client stays
 in this repository only as a worked example: four of its PDRs, anonymised in
 [docs/decisions/](docs/decisions/README.md), cited where a skill of the method
 makes the same kind of decision for the next client.

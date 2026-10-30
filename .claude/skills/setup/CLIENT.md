@@ -76,7 +76,7 @@ person, with its paragraph below as the body.
 
 > SOURCE: Ian Rueff, 2026-10-08, question UI — out of the founding brief's
 > scope; moved here from the backlog on 2026-10-09
-> ([the brief](../../../briefs/2026-10-09-empty-backlog.md)).
+> ([the brief](../../../docs/template-history/2026-10-09-empty-backlog.md)).
 
 > SOURCE: Ian, 2026-10-27, chat — no design system joins them: building one
 > from zero leaves the template for a separate repository, later.

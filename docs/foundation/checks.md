@@ -26,7 +26,7 @@ though the tree does not.
 > SOURCE: the agent, 2026-10-09 — `vercel deploy --target preview` ran the five
 > steps of `vercel.json`'s `buildCommand` in order, and with lint red on purpose
 > it stopped at `lint` and published nothing
-> ([the brief](../../briefs/2026-10-09-vercel-deploy.md)).
+> ([the brief](../template-history/2026-10-09-vercel-deploy.md)).
 
 **CI does not gate the merge on purpose, and that is worth understanding
 rather than fixing by reflex.** Work reaches `main` through a local `git merge` that no
