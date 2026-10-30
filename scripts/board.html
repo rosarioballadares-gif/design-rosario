@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Board</title>
+<!-- The page served by scripts/board.mjs. Look from board-tokens.css, a frozen copy of the tokens the board was drawn with; shape from zazencodes' software factory dashboard, rewritten here. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@400&display=swap"
+/>
+<link rel="stylesheet" href="/board-tokens.css" />
+<style>
+  * { box-sizing: border-box; }
+  h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, table, figure { margin: 0; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--board-bgColor-page);
+    color: var(--board-fgColor-default);
+    font: var(--board-text-content-body);
+  }
+
+  .page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--board-spacing-24);
+    padding: var(--board-spacing-24);
+  }
+
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--board-spacing-8) var(--board-spacing-16);
+  }
+  .top h1 { font: var(--board-text-heading-3); }
+
+  .parts { display: flex; flex-direction: column; gap: var(--board-spacing-40); }
+  .part { display: flex; flex-direction: column; gap: var(--board-spacing-16); }
+  .part-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--board-spacing-4) var(--board-spacing-12); }
+  .part-head h2 { font: var(--board-text-heading-4); }
+  .status { font: var(--board-text-content-caption); color: var(--board-fgColor-muted); }
+  .status.error, .line.problem { display: flex; align-items: baseline; gap: var(--board-spacing-6); color: var(--board-fgColor-default); }
+  .status.error::before, .line.problem::before {
+    content: '';
+    flex: none;
+    width: var(--board-badge-dotSize);
+    height: var(--board-badge-dotSize);
+    border-radius: var(--board-radius-full);
+    background: var(--board-badge-dangerBgColor);
+  }
+
+  .notes { display: flex; flex-direction: column; gap: var(--board-spacing-8); }
+  .notes:empty { display: none; }
+  .note {
+    font: var(--board-text-content-body-2);
+    color: var(--board-fgColor-subtle);
+    padding: var(--board-spacing-12) var(--board-spacing-16);
+    border: var(--board-card-borderWidth) solid var(--board-borderColor-default);
+    border-radius: var(--board-card-radius);
+  }
+  .note.problem { border-color: var(--board-bgColor-danger); color: var(--board-fgColor-default); }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--board-spacing-16);
+    align-items: start;
+  }
+  .col { display: flex; flex-direction: column; gap: var(--board-spacing-12); }
+  .col-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--board-spacing-8);
+    padding-block-end: var(--board-spacing-8);
+    border-block-end: var(--board-card-borderWidth) solid var(--board-borderColor-default);
+  }
+  .col-name { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--board-spacing-4) var(--board-spacing-8); }
+  .col-name h3 { font: var(--board-text-content-label); }
+  .who, .count, .empty, .more { font: var(--board-text-content-caption); color: var(--board-fgColor-muted); }
+  .empty { padding-block: var(--board-spacing-8); }
+
+  .groups { display: flex; flex-direction: column; gap: var(--board-spacing-24); }
+  .file-group { display: flex; flex-direction: column; gap: var(--board-spacing-8); }
+  .group-name { font: var(--board-text-heading-5); color: var(--board-fgColor-muted); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--board-spacing-12); }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--board-card-gap);
+    width: 100%;
+    padding: var(--board-card-padding);
+    border: var(--board-card-borderWidth) solid var(--board-card-borderColor);
+    border-radius: var(--board-card-radius);
+    background-color: var(--board-card-bgColor);
+    background-image: var(--board-card-tint);
+    box-shadow: var(--board-card-shadow);
+    color: var(--board-card-color);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  .card:hover { border-color: var(--board-borderColor-emphasis); }
+  .card:focus-visible, .close:focus-visible, .file:focus-visible { outline: auto; }
+  .card.waiting { border-color: var(--board-bgColor-danger); }
+  .title, .branch, .line { display: block; }
+  .card-top { display: flex; align-items: center; justify-content: space-between; gap: var(--board-spacing-8); }
+  .slug, .branch { font: var(--board-text-content-caption); color: var(--board-fgColor-muted); overflow-wrap: anywhere; }
+  .branch { font-family: var(--board-font-mono); }
+  .title { font: var(--board-text-heading-4); }
+  .line { font: var(--board-text-content-body-2); color: var(--board-fgColor-subtle); }
+  .clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+
+  .flag {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    height: var(--board-badge-countSize);
+    padding-inline: var(--board-badge-countPaddingInline);
+    border-radius: var(--board-badge-radius);
+    background: var(--board-badge-dangerBgColor);
+    color: var(--board-badge-dangerColor);
+    font: var(--board-text-content-caption);
+    font-weight: var(--board-fontWeight-semibold);
+  }
+
+  .rounds { display: flex; flex-direction: column; gap: var(--board-spacing-6); }
+  .round { display: flex; flex-wrap: wrap; align-items: center; gap: var(--board-spacing-8); }
+  .rn { font: var(--board-text-content-caption); font-family: var(--board-font-mono); color: var(--board-fgColor-muted); }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--board-spacing-6);
+    height: var(--board-badge-countSize);
+    font: var(--board-text-content-caption);
+    color: var(--board-fgColor-subtle);
+  }
+  .chip::before {
+    content: '';
+    flex: none;
+    width: var(--board-badge-dotSize);
+    height: var(--board-badge-dotSize);
+    border-radius: var(--board-radius-full);
+  }
+  .chip.pass::before { background: var(--board-badge-successBgColor); }
+  .chip.pending::before { border: var(--board-badge-pendingBorderWidth) solid var(--board-badge-pendingBorderColor); }
+  .chip.changes, .chip.invalid {
+    padding-inline: var(--board-badge-countPaddingInline);
+    border-radius: var(--board-badge-radius);
+    background: var(--board-badge-dangerBgColor);
+    color: var(--board-badge-dangerColor);
+  }
+  .chip.changes::before { background: currentColor; }
+  .chip.invalid::before { border: var(--board-badge-pendingBorderWidth) dashed currentColor; }
+
+  .drawer-wrap[hidden] { display: none; }
+  .scrim { position: fixed; inset: 0; background: var(--board-bgColor-scrim); }
+  .drawer:focus { outline: none; }
+  .drawer {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-end: 0;
+    display: flex;
+    flex-direction: column;
+    width: min(760px, 100vw);
+    background: var(--board-bgColor-panelSolid);
+    border-inline-start: var(--board-card-borderWidth) solid var(--board-borderColor-default);
+  }
+  .d-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--board-spacing-4) var(--board-spacing-16);
+    padding: var(--board-spacing-16) var(--board-spacing-24);
+    border-block-end: var(--board-card-borderWidth) solid var(--board-borderColor-default);
+  }
+  .d-head > :not(.close) { grid-column: 1; }
+  .d-head h2 { font: var(--board-text-heading-3); }
+  .close {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    align-self: start;
+    width: var(--board-size-touch);
+    height: var(--board-size-touch);
+    border: 0;
+    border-radius: var(--board-radius-full);
+    background: transparent;
+    color: var(--board-fgColor-default);
+    font: var(--board-text-heading-3);
+    cursor: pointer;
+  }
+  .close:hover { background: var(--board-bgColor-veil); }
+  .d-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 200px 1fr; }
+  .drawer-wrap.item .files { display: none; }
+  .drawer-wrap.item .d-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  .files {
+    display: flex;
+    flex-direction: column;
+    gap: var(--board-spacing-4);
+    padding: var(--board-spacing-16);
+    border-inline-end: var(--board-card-borderWidth) solid var(--board-borderColor-default);
+    overflow-y: auto;
+  }
+  .group { font: var(--board-text-heading-5); color: var(--board-fgColor-muted); padding: var(--board-spacing-8) var(--board-spacing-8) 0; }
+  .file {
+    display: flex;
+    align-items: center;
+    gap: var(--board-spacing-6);
+    padding: var(--board-spacing-6) var(--board-spacing-8);
+    border: 0;
+    border-radius: var(--board-radius-inline);
+    background: transparent;
+    color: var(--board-fgColor-subtle);
+    font: var(--board-text-content-body-2);
+    text-align: start;
+    cursor: pointer;
+  }
+  .file:hover { background: var(--board-bgColor-veil); }
+  .file[aria-current='true'] { background: var(--board-bgColor-selected); color: var(--board-fgColor-default); }
+
+  .doc {
+    display: flex;
+    flex-direction: column;
+    gap: var(--board-spacing-12);
+    padding: var(--board-spacing-24);
+    overflow-y: auto;
+    font: var(--board-text-content-body-2);
+    overflow-wrap: anywhere;
+  }
+  .doc h3 { font: var(--board-text-heading-3); }
+  .doc h4 { font: var(--board-text-heading-4); }
+  .doc h5, .doc h6 { font: var(--board-text-heading-5); }
+  .doc ul, .doc ol { display: flex; flex-direction: column; gap: var(--board-spacing-4); padding-inline-start: var(--board-spacing-20); }
+  .doc li.task { list-style: none; }
+  .doc li.task::marker { content: none; }
+  .doc li.done { color: var(--board-fgColor-muted); }
+  .doc li.l2 { padding-inline-start: var(--board-spacing-16); }
+  .doc li.l3 { padding-inline-start: var(--board-spacing-32); }
+  .doc code { font-family: var(--board-font-mono); font-size: 0.92em; }
+  .doc pre {
+    padding: var(--board-spacing-12);
+    border-radius: var(--board-radius-inline);
+    background: var(--board-bgColor-veil);
+    overflow-x: auto;
+  }
+  .doc blockquote {
+    display: flex;
+    flex-direction: column;
+    gap: var(--board-spacing-8);
+    padding-inline-start: var(--board-spacing-12);
+    border-inline-start: var(--board-borderWidth-2) solid var(--board-borderColor-emphasis);
+    color: var(--board-fgColor-subtle);
+  }
+  .doc table { border-collapse: collapse; }
+  .doc th, .doc td {
+    padding: var(--board-spacing-6) var(--board-spacing-8);
+    border: var(--board-card-borderWidth) solid var(--board-borderColor-default);
+    text-align: start;
+    vertical-align: top;
+  }
+  .doc hr { width: 100%; border: 0; border-block-start: var(--board-card-borderWidth) solid var(--board-borderColor-default); }
+  .doc a { color: var(--board-fgColor-brand); }
+  .doc .ref { text-decoration: underline dotted; }
+  .doc .note-text { color: var(--board-fgColor-muted); }
+
+  @media (max-width: 700px) {
+    .page { padding: var(--board-spacing-16); }
+    .d-head { padding: var(--board-spacing-12) var(--board-spacing-16); }
+    .d-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .files {
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: center;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: var(--board-spacing-8) var(--board-spacing-16);
+      border-inline-end: 0;
+      border-block-end: var(--board-card-borderWidth) solid var(--board-borderColor-default);
+    }
+    .group { padding-block-start: 0; white-space: nowrap; }
+    .file { white-space: nowrap; }
+    .doc { padding: var(--board-spacing-16); }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <h1>Board</h1>
+    <p class="status" id="status">Reading the worktrees.</p>
+  </header>
+  <main class="parts">
+    <section class="part" aria-labelledby="part-runs">
+      <div class="part-head"><h2 id="part-runs">Autopilot</h2></div>
+      <div class="notes" id="notes"></div>
+      <div class="board" id="board" aria-busy="true"></div>
+    </section>
+    <section class="part" aria-labelledby="part-backlog">
+      <div class="part-head"><h2 id="part-backlog">Backlog</h2><span class="who" id="b-rest"></span></div>
+      <div class="notes" id="b-notes"></div>
+      <div class="board" id="backlog" aria-busy="true"></div>
+    </section>
+  </main>
+</div>
+
+<div class="drawer-wrap" id="drawer" hidden>
+  <div class="scrim" data-close></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="d-title" tabindex="-1">
+    <header class="d-head">
+      <p class="slug" id="d-meta"></p>
+      <h2 id="d-title"></h2>
+      <p class="branch" id="d-branch"></p>
+      <button class="close" type="button" data-close aria-label="Close">×</button>
+    </header>
+    <div class="d-body">
+      <nav class="files" id="d-files" aria-label="Files of this run"></nav>
+      <article class="doc" id="d-doc"></article>
+    </div>
+  </aside>
+</div>
+
+<script type="module">
+import { BACKLOG_COLUMNS, COLUMNS, verdictOf } from '/board-rules.mjs';
+
+const POLL_MS = 2000;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const time = () => new Date().toLocaleTimeString();
+
+let data = null;
+let lastJson = '';
+let lastRead = null;
+let openId = null;
+let openPath = null;
+let openText = null;
+let filesHtml = null;
+let opener = null;
+let backlog = null;
+let lastBacklogJson = '';
+let openItem = null;
+
+/* Dark unless the system asks for light, as the app does. */
+const light = matchMedia('(prefers-color-scheme: light)');
+const theme = () => { document.documentElement.dataset.theme = light.matches ? 'light' : 'dark'; };
+theme();
+light.addEventListener('change', theme);
+
+/* ---- The board ------------------------------------------------------- */
+
+const slugOf = (brief) => {
+  const match = /(\d{4}-\d{2}-\d{2})-(.+)\.md$/.exec(brief ?? '');
+  return match ? `${match[1]} · ${match[2]}` : brief ?? '';
+};
+
+const CHIP_TEXT = { PASS: 'PASS', CHANGES: 'CHANGES', invalid: 'not a verdict', null: 'not written' };
+function chip(lens, verdict) {
+  const tone = verdict === 'PASS' ? 'pass' : verdict === 'CHANGES' ? 'changes' : verdict === 'invalid' ? 'invalid' : 'pending';
+  return `<span class="chip ${tone}" title="${esc(lens)}: ${CHIP_TEXT[verdict]}" aria-label="${esc(lens)}: ${CHIP_TEXT[verdict]}">${esc(lens)}</span>`;
+}
+
+function roundsHtml(rounds) {
+  if (!rounds.length) return '';
+  const rows = rounds.map((r) =>
+    `<span class="round"><span class="rn">R${r.n}</span>${Object.entries(r.verdicts).map(([l, v]) => chip(l, v)).join('')}</span>`);
+  return `<span class="rounds">${rows.join('')}</span>`;
+}
+
+function stepsLine(steps) {
+  if (!steps.length) return 'No steps listed yet';
+  const done = steps.filter((s) => s.done).length;
+  const next = steps.find((s) => !s.done);
+  if (!next) return `All ${steps.length} steps done`;
+  const state = next.state === 'pending' ? '' : ` (${next.state})`;
+  return `${done} of ${steps.length} steps · next: ${next.text.replace(/\s[—–-]\s*(partial|waiting)\s*$/i, '')}${state}`;
+}
+
+function card(run) {
+  const open = run.questions.filter((q) => !q.done);
+  const question = open.length
+    ? `<span class="line clamp">${esc(open[0].text)}${open.length > 1 ? ` · ${open.length - 1} more` : ''}</span>`
+    : '';
+  const problems = run.problems.length
+    ? `<span class="line problem">${run.problems.length === 1 ? 'A problem' : `${run.problems.length} problems`} with this run's files. Open the run to read ${run.problems.length === 1 ? 'it' : 'them'}.</span>`
+    : '';
+  return `
+    <button class="card ${run.column}" type="button" data-run="${esc(run.id)}">
+      <span class="card-top"><span class="slug">${esc(slugOf(run.brief))}</span>${open.length ? '<span class="flag">Your call</span>' : ''}</span>
+      <span class="title">${esc(run.title ?? run.brief)}</span>
+      <span class="branch">${esc(run.branch)}</span>
+      ${run.column === 'merged' ? '' : `<span class="line clamp">${esc(stepsLine(run.steps))}</span>`}
+      ${roundsHtml(run.rounds)}
+      ${question}
+      ${problems}
+    </button>`;
+}
+
+function render() {
+  const byColumn = Object.fromEntries(COLUMNS.map((c) => [c.key, []]));
+  for (const run of data.runs) byColumn[run.column]?.push(card(run));
+  $('board').innerHTML = COLUMNS.map((c) => `
+    <section class="col" aria-labelledby="col-${c.key}">
+      <div class="col-head">
+        <span class="col-name"><h3 id="col-${c.key}">${c.label}</h3><span class="who">${c.who}</span></span>
+        <span class="count">${byColumn[c.key].length || ''}</span>
+      </div>
+      ${byColumn[c.key].join('') || '<p class="empty">—</p>'}
+      ${c.key === 'merged' && data.mergedHidden ? `<p class="more">${data.mergedHidden} older in ${esc(data.main)}</p>` : ''}
+    </section>`).join('');
+  $('board').setAttribute('aria-busy', 'false');
+
+  const notes = data.problems.map((p) => `<p class="note problem">${esc(p)}</p>`);
+  if (!data.runs.length) {
+    notes.push(`<p class="note">No autopilot run on this machine yet. A run shows here once its registry opens on the header in <code>docs/foundation/autopilot.md</code> § The registry's form.</p>`);
+  }
+  $('notes').innerHTML = notes.join('');
+}
+
+/* ---- The backlog ----------------------------------------------------- */
+
+const REST_TEXT = { none: 'with no state' };
+
+function itemCard(item) {
+  return `
+    <button class="card" type="button" data-item="${esc(item.id)}">
+      <span class="slug">${esc(item.owner ?? 'No owner')}</span>
+      <span class="title">${inline(item.title)}</span>
+      ${item.reason ? `<span class="line clamp">${inline(item.reason.charAt(0).toUpperCase() + item.reason.slice(1))}</span>` : ''}
+    </button>`;
+}
+
+function renderBacklog() {
+  $('backlog').innerHTML = BACKLOG_COLUMNS.map((c) => {
+    const items = backlog.items.filter((i) => i.status === c.key);
+    const groups = [];
+    for (const item of items) {
+      if (groups.at(-1)?.name !== item.group) groups.push({ name: item.group, cards: [] });
+      groups.at(-1).cards.push(itemCard(item));
+    }
+    const body = groups.map((g) => `
+      <div class="file-group"><h4 class="group-name">${esc(g.name)}</h4><div class="cards">${g.cards.join('')}</div></div>`).join('');
+    return `
+    <section class="col" aria-labelledby="col-${c.key}">
+      <div class="col-head">
+        <span class="col-name"><h3 id="col-${c.key}">${c.label}</h3></span>
+        <span class="count">${items.length || ''}</span>
+      </div>
+      ${body ? `<div class="groups">${body}</div>` : '<p class="empty">—</p>'}
+    </section>`;
+  }).join('');
+  $('backlog').setAttribute('aria-busy', 'false');
+
+  const rest = Object.entries(backlog.rest).map(([state, n]) => `${n} ${REST_TEXT[state] ?? state}`);
+  $('b-rest').textContent = rest.length ? `Not shown: ${rest.join(', ')}` : '';
+  const notes = backlog.problems.map((p) => `<p class="note problem">${esc(p)}</p>`);
+  if (!backlog.problems.length && !backlog.items.length) {
+    notes.push(`<p class="note">Nothing is open or blocked in ${esc(backlog.main)}'s backlog.</p>`);
+  }
+  $('b-notes').innerHTML = notes.join('');
+}
+
+async function poll() {
+  const status = $('status');
+  try {
+    const [res, bres] = await Promise.all([
+      fetch('/runs.json', { cache: 'no-store' }),
+      fetch('/backlog.json', { cache: 'no-store' }),
+    ]);
+    if (!res.ok) throw new Error(await res.text());
+    if (!bres.ok) throw new Error(await bres.text());
+    const json = await res.text();
+    const backlogJson = await bres.text();
+    lastRead = time();
+    if (json !== lastJson) {
+      lastJson = json;
+      data = JSON.parse(json);
+      render();
+    }
+    if (backlogJson !== lastBacklogJson) {
+      lastBacklogJson = backlogJson;
+      backlog = JSON.parse(backlogJson);
+      renderBacklog();
+    }
+    const runs = data.runs.length;
+    status.className = 'status';
+    status.textContent = `${runs} ${runs === 1 ? 'run' : 'runs'} · ${data.trees} ${data.trees === 1 ? 'worktree' : 'worktrees'} · ${data.main} ${data.mainSha ?? '?'} · read ${lastRead}`;
+    if (openId) await refreshDrawer();
+    if (openItem) refreshItem();
+  } catch (err) {
+    status.className = 'status error';
+    status.textContent = lastRead
+      ? `The board server stopped answering. Last read ${lastRead}. Start it again with pnpm board.`
+      : `The board server is not answering: ${err.message}`;
+  } finally {
+    document.body.dataset.shotReady = 'true';
+  }
+}
+
+/* ---- The drawer ------------------------------------------------------ */
+
+const runOf = (id) => data?.runs.find((r) => r.id === id) ?? null;
+
+function fileButton(file) {
+  const review = /round-(\d+)\/review-([\w-]+)\.md$/.exec(file.path);
+  const label = review
+    ? chip(review[2], file.first === undefined ? null : verdictOf(file.first) ?? 'invalid')
+    : esc(file.path.split('/').pop());
+  return `<button class="file" type="button" data-path="${esc(file.path)}">${label}</button>`;
+}
+
+async function refreshDrawer() {
+  const run = runOf(openId);
+  if (!run) {
+    $('d-doc').innerHTML = '<p class="note-text">This run is no longer on the board: its worktree closed or its registry lost the header.</p>';
+    return;
+  }
+  const column = COLUMNS.find((c) => c.key === run.column)?.label ?? run.column;
+  const round = run.rounds.at(-1);
+  $('d-meta').textContent = `${column}${round ? ` · round ${round.n}` : ''} · ${slugOf(run.brief)}`;
+  $('d-title').textContent = run.title ?? run.brief;
+  $('d-branch').textContent = `${run.branch}${run.base ? ` from ${run.base}` : ''} · ${run.source === 'main' ? data.main : run.tree}`;
+
+  if (!run.files.some((f) => f.path === openPath)) openPath = run.files[1].path;
+  let group = null;
+  const files = run.files.map((f) => {
+    const head = f.group !== group ? `<span class="group">${esc(f.group)}</span>` : '';
+    group = f.group;
+    return head + fileButton(f);
+  }).join('');
+  /* Rebuilt only when the list changes, so a poll never takes the focus off a file. */
+  if (files !== filesHtml) $('d-files').innerHTML = filesHtml = files;
+  for (const b of $('d-files').querySelectorAll('.file')) b.setAttribute('aria-current', b.dataset.path === openPath);
+
+  let text = null;
+  const res = await fetch(`/file?run=${encodeURIComponent(run.id)}&path=${encodeURIComponent(openPath)}`, { cache: 'no-store' });
+  if (res.ok) text = await res.text();
+  if (text === openText && $('d-doc').childElementCount) return;
+  openText = text;
+  const problems = openPath === run.path && run.problems.length
+    ? `<blockquote>${run.problems.map((p) => `<p>${inline(p)}</p>`).join('')}</blockquote>`
+    : '';
+  $('d-doc').innerHTML = text === null
+    ? '<p class="note-text">Not written yet.</p>'
+    : problems + markdown(text);
+}
+
+async function openDrawer(id, from) {
+  openId = id;
+  openItem = null;
+  openPath = null;
+  openText = null;
+  opener = from;
+  $('d-doc').innerHTML = '';
+  $('drawer').classList.remove('item');
+  $('drawer').hidden = false;
+  await refreshDrawer();
+  document.querySelector('.drawer').focus();
+}
+
+/* A backlog item is one body already in /backlog.json, so its drawer has no file list. */
+function refreshItem() {
+  const item = backlog?.items.find((i) => i.id === openItem);
+  if (!item) {
+    openText = null;
+    $('d-doc').innerHTML = `<p class="note-text">This item is no longer open or blocked in ${esc(backlog?.main)}.</p>`;
+    return;
+  }
+  const column = BACKLOG_COLUMNS.find((c) => c.key === item.status)?.label ?? item.status;
+  $('d-meta').textContent = `${column} · ${item.group} · ${item.owner ?? 'No owner'}`;
+  $('d-title').innerHTML = inline(item.title);
+  $('d-branch').textContent = `${item.path} · ${backlog.main}`;
+  if (item.body === openText && $('d-doc').childElementCount) return;
+  openText = item.body;
+  $('d-doc').innerHTML = markdown(item.body);
+}
+
+function openItemDrawer(id, from) {
+  openId = null;
+  openItem = id;
+  openText = null;
+  opener = from;
+  $('d-doc').innerHTML = '';
+  $('drawer').classList.add('item');
+  $('drawer').hidden = false;
+  refreshItem();
+  document.querySelector('.drawer').focus();
+}
+
+function closeDrawer() {
+  openId = null;
+  openItem = null;
+  $('drawer').hidden = true;
+  opener?.focus();
+}
+
+$('board').addEventListener('click', (e) => {
+  const button = e.target.closest('[data-run]');
+  if (button) openDrawer(button.dataset.run, button);
+});
+$('backlog').addEventListener('click', (e) => {
+  const button = e.target.closest('[data-item]');
+  if (button) openItemDrawer(button.dataset.item, button);
+});
+$('d-files').addEventListener('click', (e) => {
+  const button = e.target.closest('[data-path]');
+  if (!button) return;
+  openPath = button.dataset.path;
+  openText = null;
+  refreshDrawer();
+});
+$('drawer').addEventListener('click', (e) => {
+  if (e.target.closest('[data-close]')) closeDrawer();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && (openId || openItem)) closeDrawer();
+});
+
+/* ---- Markdown, the subset registries, briefs and reviews use ---------- */
+
+function inline(text) {
+  return String(text).split(/(`[^`]*`)/).map((part) => {
+    if (/^`[^`]*`$/.test(part)) return `<code>${esc(part.slice(1, -1))}</code>`;
+    return esc(part)
+      .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label, href) => /^https?:\/\//.test(href)
+        ? `<a href="${href}" target="_blank" rel="noreferrer">${label}</a>`
+        : `<span class="ref" title="${href}">${label}</span>`)
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/(^|[^\w*])\*([^*\s][^*]*?)\*(?![\w*])/g, '$1<em>$2</em>')
+      .replace(/(^|[^\w])_([^_\s][^_]*?)_(?!\w)/g, '$1<em>$2</em>');
+  }).join('');
+}
+
+const ITEM = /^(\s*)([-*+]|\d+\.)\s+(.*)$/;
+const RULE = /^ {0,3}([-*_])( *\1){2,} *$/;
+const startsBlock = (line) => /^(#{1,6}\s|>|```|~~~|\s*\|)/.test(line) || ITEM.test(line) || RULE.test(line);
+
+function markdown(source) {
+  const lines = source.replace(/^﻿?---\r?\n[\s\S]*?\r?\n---\r?\n?/, '').split(/\r?\n/);
+  let html = '';
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line.trim()) { i++; continue; }
+    const fence = /^(```|~~~)/.exec(line);
+    if (fence) {
+      const body = [];
+      i++;
+      while (i < lines.length && !lines[i].startsWith(fence[1])) body.push(lines[i++]);
+      i++;
+      html += `<pre><code>${esc(body.join('\n'))}</code></pre>`;
+      continue;
+    }
+    const heading = /^(#{1,6})\s+(.*)$/.exec(line);
+    if (heading) {
+      const level = Math.min(heading[1].length + 2, 6);
+      html += `<h${level}>${inline(heading[2])}</h${level}>`;
+      i++;
+      continue;
+    }
+    if (RULE.test(line)) { html += '<hr />'; i++; continue; }
+    if (line.startsWith('>')) {
+      const body = [];
+      while (i < lines.length && lines[i].startsWith('>')) body.push(lines[i++].replace(/^>\s?/, ''));
+      html += `<blockquote>${markdown(body.join('\n'))}</blockquote>`;
+      continue;
+    }
+    if (/^\s*\|/.test(line)) {
+      const rows = [];
+      while (i < lines.length && /^\s*\|/.test(lines[i])) rows.push(lines[i++].trim());
+      const cells = (row) => row.replace(/^\||\|$/g, '').split('|').map((c) => inline(c.trim()));
+      const body = rows.filter((r) => !/^\|[\s:|-]+\|$/.test(r));
+      html += `<table>${body.map((r, n) => `<tr>${cells(r).map((c) => (n ? `<td>${c}</td>` : `<th>${c}</th>`)).join('')}</tr>`).join('')}</table>`;
+      continue;
+    }
+    if (ITEM.test(line)) {
+      const ordered = /^\s*\d+\./.test(line);
+      const items = [];
+      while (i < lines.length && (ITEM.test(lines[i]) || (items.length && /^\s{2,}\S/.test(lines[i])))) {
+        const item = ITEM.exec(lines[i]);
+        if (item) items.push({ depth: Math.min(Math.floor(item[1].length / 2), 2), text: item[3] });
+        else items.at(-1).text += ` ${lines[i].trim()}`;
+        i++;
+      }
+      const lis = items.map(({ depth, text }) => {
+        const task = /^\[([ xX])\]\s+(.*)$/.exec(text);
+        const level = depth ? ` l${depth + 1}` : '';
+        return task
+          ? `<li class="task${task[1] === ' ' ? '' : ' done'}${level}">${task[1] === ' ' ? '☐' : '☑'} ${inline(task[2])}</li>`
+          : `<li class="${level.trim()}">${inline(text)}</li>`;
+      }).join('');
+      html += ordered ? `<ol>${lis}</ol>` : `<ul>${lis}</ul>`;
+      continue;
+    }
+    const para = [];
+    while (i < lines.length && lines[i].trim() && !startsBlock(lines[i])) para.push(lines[i++]);
+    if (!para.length) para.push(lines[i++]);
+    html += `<p>${inline(para.join(' '))}</p>`;
+  }
+  return html;
+}
+
+poll();
+setInterval(poll, POLL_MS);
+</script>
+</body>
+</html>

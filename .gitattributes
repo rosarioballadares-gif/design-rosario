@@ -1,0 +1,6 @@
+# Every text file is LF, in the index and on every checkout, whatever a
+# machine's core.autocrlf says. A CRLF working tree printed a warning on every
+# git command, broke edits that match on "\n", and moved check:floor's
+# measurement of an unchanged CLAUDE.md by 85 tokens (2026-10-08).
+# Brief: briefs/2026-10-08-user-hooks.md
+* text=auto eol=lf

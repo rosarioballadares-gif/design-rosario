@@ -1,0 +1,170 @@
+/* Frozen. The board's own look, copied on 2026-10-08 from the generated
+   token CSS of a previous client's repository,
+   pruned to the custom properties scripts/board.html reads and what they
+   resolve through, with its prefix renamed --board-.
+
+   Why a copy: the board is a tool of this method, not a screen of a product,
+   and this repository starts with no token set. Nothing regenerates this file
+   and no client's tokens should reach it. Brief: briefs/2026-10-08-product-ops-base.md */
+:root {
+  --board-color-ink-25: #f6f5fa;
+  --board-color-ink-100: #e8e6f0;
+  --board-color-ink-200: #dcd8e8;
+  --board-color-ink-400: #9a95b5;
+  --board-color-ink-600: #5d5875;
+  --board-color-ink-800: #2e2a45;
+  --board-color-ink-900: #1b1530;
+  --board-color-ink-950: #0d0a1c;
+  --board-color-green-500: #22c55e;
+  --board-color-green-600: #16a34a;
+  --board-color-rose-500: #f43f5e;
+  --board-color-indigo-500: #5b5bf6;
+  --board-color-white: #ffffff;
+  --board-color-alpha-black-50: rgba(0,0,0,.5);
+  --board-color-alpha-white-6: rgba(255,255,255,.06);
+  --board-color-alpha-white-70: rgba(255,255,255,.7);
+  --board-color-alpha-white-92: rgba(255,255,255,0.92);
+  --board-color-alpha-ink100-20: #e8e6f033;
+  --board-color-alpha-ink900-20: #1b153033;
+  --board-color-alpha-ink950-90: rgba(13,10,28,0.9);
+  --board-color-alpha-ink100-85: #e8e6f0d9;
+  --board-color-alpha-ink900-85: #1b1530d9;
+  --board-color-alpha-ink100-35: #e8e6f059;
+  --board-color-alpha-ink900-35: #1b153059;
+  --board-fontFamily-mono: 'Roboto Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+  --board-fontWeight-semibold: 600;
+  --board-spacing-4: 4px;
+  --board-spacing-6: 6px;
+  --board-spacing-8: 8px;
+  --board-spacing-12: 12px;
+  --board-spacing-16: 16px;
+  --board-spacing-20: 20px;
+  --board-spacing-24: 24px;
+  --board-spacing-32: 32px;
+  --board-spacing-40: 40px;
+  --board-sizing-8: 8px;
+  --board-sizing-20: 20px;
+  --board-sizing-44: 44px;
+  --board-borderRadius-8: 8px;
+  --board-borderRadius-12: 12px;
+  --board-borderRadius-full: 999px;
+  --board-borderWidth-1: 1px;
+  --board-borderWidth-2: 2px;
+  --board-borderWidth-1_5: 1.5px;
+  --board-font-mono: var(--board-fontFamily-mono);
+  --board-text-heading-3: 700 16px/1.25 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --board-text-heading-4: 700 14px/1.25 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --board-text-heading-5: 700 12px/1.25 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --board-text-content-body: 400 16px/1.4 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --board-text-content-body-2: 400 14px/1.5 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --board-text-content-label: 600 14px/1 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --board-text-content-caption: 400 12px/1 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --board-radius-surface: var(--board-borderRadius-12);
+  --board-radius-inline: var(--board-borderRadius-8);
+  --board-radius-full: var(--board-borderRadius-full);
+  --board-size-touch: var(--board-sizing-44);
+}
+:root, [data-theme="dark"] {
+  --board-bgColor-page: var(--board-color-ink-950);
+  --board-bgColor-panel: var(--board-color-alpha-ink950-90);
+  --board-bgColor-panelSolid: var(--board-color-ink-950);
+  --board-bgColor-veil: var(--board-color-alpha-white-6);
+  --board-bgColor-floatingTint: linear-gradient(180deg, #272ea033 0%, #2e0f4e33 100%);
+  --board-bgColor-selected: var(--board-color-alpha-ink100-20);
+  --board-bgColor-danger: var(--board-color-rose-500);
+  --board-bgColor-scrim: var(--board-color-alpha-black-50);
+  --board-fgColor-default: var(--board-color-ink-100);
+  --board-fgColor-subtle: var(--board-color-alpha-ink100-85);
+  --board-fgColor-muted: var(--board-color-ink-400);
+  --board-fgColor-onDanger: var(--board-color-white);
+  --board-fgColor-success: var(--board-color-green-500);
+  --board-fgColor-brand: var(--board-color-indigo-500);
+  --board-borderColor-default: var(--board-color-ink-800);
+  --board-borderColor-emphasis: var(--board-color-alpha-ink100-35);
+  --board-elevation-card: 0 8px 28px 0 rgba(0,0,0,.45);
+  --board-card-bgColor: var(--board-bgColor-panel);
+  --board-card-tint: var(--board-bgColor-floatingTint);
+  --board-card-color: var(--board-fgColor-default);
+  --board-card-borderColor: var(--board-borderColor-default);
+  --board-card-shadow: var(--board-elevation-card);
+  --board-card-radius: var(--board-radius-surface);
+  --board-card-borderWidth: var(--board-borderWidth-1);
+  --board-card-padding: var(--board-surface-padding-m);
+  --board-card-gap: var(--board-panel-contentGap-s);
+  --board-badge-countSize: var(--board-sizing-20);
+  --board-badge-countPaddingInline: var(--board-spacing-8);
+  --board-badge-dotSize: var(--board-sizing-8);
+  --board-badge-radius: var(--board-radius-full);
+  --board-badge-dangerBgColor: var(--board-bgColor-danger);
+  --board-badge-dangerColor: var(--board-fgColor-onDanger);
+  --board-badge-successBgColor: var(--board-fgColor-success);
+  --board-badge-pendingBorderColor: var(--board-fgColor-muted);
+  --board-badge-pendingBorderWidth: var(--board-borderWidth-1_5);
+}
+[data-theme="light"] {
+  --board-bgColor-page: var(--board-color-ink-25);
+  --board-bgColor-panel: var(--board-color-alpha-white-92);
+  --board-bgColor-panelSolid: var(--board-color-white);
+  --board-bgColor-veil: var(--board-color-alpha-white-70);
+  --board-bgColor-floatingTint: linear-gradient(180deg, #e3e5ff80 0%, #f1e3f680 100%);
+  --board-bgColor-selected: var(--board-color-alpha-ink900-20);
+  --board-bgColor-danger: var(--board-color-rose-500);
+  --board-bgColor-scrim: var(--board-color-alpha-black-50);
+  --board-fgColor-default: var(--board-color-ink-900);
+  --board-fgColor-subtle: var(--board-color-alpha-ink900-85);
+  --board-fgColor-muted: var(--board-color-ink-600);
+  --board-fgColor-onDanger: var(--board-color-white);
+  --board-fgColor-success: var(--board-color-green-600);
+  --board-fgColor-brand: var(--board-color-indigo-500);
+  --board-borderColor-default: var(--board-color-ink-200);
+  --board-borderColor-emphasis: var(--board-color-alpha-ink900-35);
+  --board-elevation-card: 0 8px 28px 0 rgba(27,21,48,.16);
+  --board-card-bgColor: var(--board-bgColor-panel);
+  --board-card-tint: var(--board-bgColor-floatingTint);
+  --board-card-color: var(--board-fgColor-default);
+  --board-card-borderColor: var(--board-borderColor-default);
+  --board-card-shadow: var(--board-elevation-card);
+  --board-card-radius: var(--board-radius-surface);
+  --board-card-borderWidth: var(--board-borderWidth-1);
+  --board-card-padding: var(--board-surface-padding-m);
+  --board-card-gap: var(--board-panel-contentGap-s);
+  --board-badge-countSize: var(--board-sizing-20);
+  --board-badge-countPaddingInline: var(--board-spacing-8);
+  --board-badge-dotSize: var(--board-sizing-8);
+  --board-badge-radius: var(--board-radius-full);
+  --board-badge-dangerBgColor: var(--board-bgColor-danger);
+  --board-badge-dangerColor: var(--board-fgColor-onDanger);
+  --board-badge-successBgColor: var(--board-fgColor-success);
+  --board-badge-pendingBorderColor: var(--board-fgColor-muted);
+  --board-badge-pendingBorderWidth: var(--board-borderWidth-1_5);
+}
+:root, [data-breakpoint="xl"] {
+  --board-panel-contentGap-s: var(--board-spacing-16);
+  --board-surface-padding-m: var(--board-spacing-16);
+  --board-card-padding: var(--board-surface-padding-m);
+  --board-card-gap: var(--board-panel-contentGap-s);
+}
+[data-breakpoint="lg"] {
+  --board-panel-contentGap-s: var(--board-spacing-16);
+  --board-surface-padding-m: var(--board-spacing-16);
+  --board-card-padding: var(--board-surface-padding-m);
+  --board-card-gap: var(--board-panel-contentGap-s);
+}
+[data-breakpoint="md"] {
+  --board-panel-contentGap-s: var(--board-spacing-16);
+  --board-surface-padding-m: var(--board-spacing-16);
+  --board-card-padding: var(--board-surface-padding-m);
+  --board-card-gap: var(--board-panel-contentGap-s);
+}
+[data-breakpoint="sm"] {
+  --board-panel-contentGap-s: var(--board-spacing-16);
+  --board-surface-padding-m: var(--board-spacing-16);
+  --board-card-padding: var(--board-surface-padding-m);
+  --board-card-gap: var(--board-panel-contentGap-s);
+}
+[data-breakpoint="base"] {
+  --board-panel-contentGap-s: var(--board-spacing-16);
+  --board-surface-padding-m: var(--board-spacing-16);
+  --board-card-padding: var(--board-surface-padding-m);
+  --board-card-gap: var(--board-panel-contentGap-s);
+}

@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "effortLevel": "high",
+  "ultracode": false,
+  "workflowSizeGuideline": "small",
+  "skillListingMaxDescChars": 120,
+  "attribution": { "commit": "", "pr": "", "sessionUrl": false },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["scripts/session-brief.mjs"],
+            "timeout": 10,
+            "statusMessage": "Reading the workspace profile"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["scripts/skill-router.cjs"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["scripts/git-guard.cjs"],
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["scripts/memory-index-guard.cjs"],
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["scripts/worktree-edit-guard.cjs"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["scripts/edit-round-notice.cjs"],
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["scripts/bash-round-notice.cjs"],
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|mcp__.*__use_figma",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["scripts/skill-router.cjs"],
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["scripts/call-budget-notice.cjs"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["scripts/ask-guard.cjs"],
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "skillOverrides": {
+    "pattern-research": "name-only",
+    "feedback": "name-only",
+    "contrast-audit": "name-only",
+    "model-and-effort": "name-only",
+    "sandbox": "name-only",
+
+    "dataviz": "user-invocable-only",
+    "artifact-design": "user-invocable-only",
+    "artifact-capabilities": "user-invocable-only",
+    "artifact-diagramming": "user-invocable-only",
+    "claude-api": "user-invocable-only",
+    "schedule": "user-invocable-only",
+    "loop": "user-invocable-only",
+    "workflow-authoring": "user-invocable-only",
+    "keybindings-help": "user-invocable-only",
+    "fewer-permission-prompts": "user-invocable-only",
+    "security-review": "user-invocable-only",
+    "init": "user-invocable-only",
+    "code-review": "name-only",
+    "update-config": "name-only"
+  }
+}

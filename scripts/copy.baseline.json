@@ -1,0 +1,8 @@
+{
+  "measured": "2026-10-08",
+  "why": "What already breaks a character rule. Rewrite this to REPORT what moved, never to make the check green. 2026-10-08: the floor moved from 7 to 16 files, the .ts and .tsx the base walks after the founding cut; no finding moved, 0 before and 0 after.",
+  "expect": {
+    "files": 16
+  },
+  "known": {}
+}

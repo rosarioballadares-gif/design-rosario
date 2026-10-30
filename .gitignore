@@ -1,0 +1,40 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+node_modules
+dist
+dist-review
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.sw?
+
+# Written by /setup. Describes a person and a machine, not the repository.
+.claude/profile.local.json
+
+# One person's Claude Code settings and notes, and credentials.
+.claude/settings.local.json
+CLAUDE.local.md
+.env*
+
+# Whole checkouts of this repository, made by the agent runtime when work is
+# isolated. Another session's working state, not this repository's content, and
+# they carry their own `src/` — which is why `vite.config.ts` also excludes them
+# from the test glob.
+.claude/worktrees/
+
+# The receipt `pnpm gate` leaves for `git-guard.cjs`. Evidence about ONE
+# checkout: which HEAD was measured green, and when. Machine-local by design,
+# since sharing it would mean one machine vouching for a tree another has.
+.gate-receipt.json
+
+.vercel

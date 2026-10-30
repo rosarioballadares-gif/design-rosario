@@ -1,0 +1,27 @@
+{
+  "//": "Tests run in Node and read files; the app runs in a browser and must not. One project for both would give application code the Node types, so `import { readFileSync } from 'node:fs'` in a component would typecheck and fail only in the browser. This project exists so the specs get `node` and `src` never does.",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.spec.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "types": ["vite/client", "node"],
+    "allowArbitraryExtensions": true,
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src/**/*.spec.ts", "src/**/*.spec.tsx", "scripts/**/*.spec.ts"]
+}

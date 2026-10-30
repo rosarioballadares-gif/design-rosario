@@ -1,0 +1,8 @@
+{
+  "$comment": "The token set's shape, read by scripts/build-tokens.mjs and tokens.spec.ts. A null prefix means there is no set yet: the build writes every output empty. The `tokens` skill fills the prefix and the modes; the bands are filled widest first, once the client's are decided.",
+  "prefix": null,
+  "modes": [],
+  "defaultMode": null,
+  "bands": [],
+  "defaultBand": null
+}

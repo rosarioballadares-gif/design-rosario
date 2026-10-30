@@ -1,0 +1,139 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Get started" />
+
+# Get started
+
+The design system lives in two places, code and the design file, and they are
+the same system: every token, style and component exists on both sides under
+the same name.
+
+**Nothing is built yet.** The client intake (`/setup`) records what design
+system this product has, and the work that wires it fills this page: the
+tokens, the headless framework, the components, the bands, the app shell. Until
+then, every section below states the rule each part keeps, not a value.
+
+{/* Storybook's MDX has no GFM, so a Markdown table renders as its pipes. */}
+
+<table>
+  <thead>
+    <tr><th>Surface</th><th>Where</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Storybook (this site)</td><td>Not published yet</td></tr>
+    <tr><td>Design file</td><td>Named by `/setup` in `docs/foundation/workspace-wiring.md`</td></tr>
+    <tr><td>Code</td><td>`src/ds/`</td></tr>
+  </tbody>
+</table>
+
+## Figma and code are 1:1
+
+A name read in one place finds the same thing in the other. The only change is
+the separator each medium uses. `px` below stands for the prefix the `tokens`
+skill asks for.
+
+<table>
+  <thead>
+    <tr><th>What</th><th>In code</th><th>In Figma</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Colour, space, radius</td><td>`--px-bgColor-page` in CSS, `tokensFor(mode).bgColor.page` in TypeScript</td><td>Variable `bgColor/page`</td></tr>
+    <tr><td>Type</td><td>`--px-text-content-body`</td><td>Text style `text/content/body`</td></tr>
+    <tr><td>Mode</td><td>`data-theme="<mode>"` on any element</td><td>The Theme collection's mode on any frame</td></tr>
+    <tr><td>Component</td><td>`PxSwitch`, props `label`, `hideLabel`, `checked`</td><td>Component set `PxSwitch`, props `✏️ Label`, `👁️ Label`, `Off <--> On`</td></tr>
+  </tbody>
+</table>
+
+- **Sections match.** A component in Storybook's **Controls** sits on the
+  **CONTROLS** page in Figma, and so on for each category.
+- **Descriptions match.** A component's description is written once and used on
+  both sides, in the same shape: what it is, `Goes in:`, `Does not go in:`,
+  `Particularity:`.
+- **Figma prop names follow one convention**, set out below in
+  [Figma prop names](#figma-prop-names).
+- **A change is not done until it reaches both sides.** Every change to a
+  token, a style or a component asks at intake whether it goes to Figma, code
+  or both, then gets carried to each.
+
+**What is not automatic.** Nothing compares the Figma file with the code, and
+the Figma variables carry no code syntax. The shared name is the link, and the
+process above is what keeps the names equal.
+
+## Figma prop names
+
+An emoji ahead of a property's name says what kind of property it is, so two
+properties can act on one part under one word: `✏️ Label` sets the label's
+text and `👁️ Label` shows or hides it. Every text, boolean and instance swap
+property carries one.
+
+<table>
+  <thead>
+    <tr><th>Emoji</th><th>Means</th><th>Example</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>`✏️`</td><td>The text a part shows</td><td>`✏️ Label`</td></tr>
+    <tr><td>`👁️`</td><td>Shows or hides a part: a boolean, or a variant when hiding it changes the size</td><td>`👁️ Label`, a popover's variant `👁️ Title`</td></tr>
+    <tr><td>`🔃`</td><td>Swaps an instance</td><td>an icon button's `🔃 Icon`</td></tr>
+    <tr><td>`◀️` `▶️`</td><td>After another emoji: the leading or the trailing part</td><td>`👁️ ◀️ Leading slot`, `👁️ ▶️ Trailing slot`</td></tr>
+    <tr><td>`✅`</td><td>`✅ Selected`: which option of a group is selected, `1st`, `2nd`…</td><td>tabs, a radio group, a segmented control</td></tr>
+    <tr><td>`☑️`</td><td>On or off, for a single item</td><td>a tree item's `☑️ Selected`, a collapsible's `☑️ Open`</td></tr>
+    <tr><td>`📏`</td><td>`📏 Size`: a size in pixels</td><td>an avatar's `📏 Size`</td></tr>
+    <tr><td>`📱` `🔒` `↕️` `🌓`</td><td>One name each: `📱 Touch`, `🔒 Modal`, `↕️ Overflow`, `🌓 Theme`</td><td>a menu, a drawer, a scroll area</td></tr>
+  </tbody>
+</table>
+
+- **Any other variant keeps a plain name**, such as `State`, `Variant`, `Type`
+  or `Color`, and so does a named size: a button's `Size` is `Default` or
+  `Small`.
+- **A slot carries no emoji.** A boolean that shows it takes `👁️` and the
+  slot's name: a card's `👁️ Actions` shows its `Actions` slot.
+
+A value that carries an emoji follows the same order: emoji, space, word.
+
+<table>
+  <thead>
+    <tr><th>Emoji</th><th>Value</th><th>Example</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>`🧲`</td><td>`🧲 Hover`</td><td>a button's `State`</td></tr>
+    <tr><td>`🚫`</td><td>`🚫 Disabled`</td><td>a button's `State`</td></tr>
+    <tr><td>`☑️`</td><td>`☑️ Active`</td><td>a text field's `State`</td></tr>
+    <tr><td>`🅿️`</td><td>`🅿️ Placeholder`</td><td>a text field's `State`</td></tr>
+    <tr><td>`🫙`</td><td>An empty state: `🫙 No match`, `🫙 No results`</td><td>a combobox's `State`</td></tr>
+    <tr><td>`✅` `⚪` `🔴`</td><td>A colour: `✅ Success`, `⚪ Inactive`, `🔴 Danger`</td><td>a badge's `Color`</td></tr>
+    <tr><td>`⏳`</td><td>Not started yet: `⏳ Pending`</td><td>a badge's `Color`</td></tr>
+  </tbody>
+</table>
+
+## Token architecture
+
+Three tiers, and a reference only ever points down a tier. The third,
+component, is optional: it enters for multi-brand and cases like it.
+
+<table>
+  <thead>
+    <tr><th>Tier</th><th>Holds</th><th>Example</th><th>Figma collection</th><th>Code</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Primitive</td><td>A raw value: a hue and a step, a size</td><td>`color/ink/950`</td><td>Primitives</td><td>`primitive.json`</td></tr>
+    <tr><td>Semantic</td><td>A meaning, pointing at a primitive, per mode</td><td>`bgColor/page`</td><td>Theme, one mode per mode</td><td>`semantic/*.json`</td></tr>
+    <tr><td>Component</td><td>One component's part, pointing at a semantic</td><td>`switch/…`, `card/…`</td><td>Component</td><td>`component.json`</td></tr>
+  </tbody>
+</table>
+
+- **A screen binds to semantic or component tokens, never to a primitive.**
+  That is what lets one mode switch repaint everything.
+- **Every semantic token carries a rule**: what it is for, when to use it, what
+  not to do, and which rival token it is easily confused with. Read it in the
+  variable's description in Figma, or in `src/ds/tokens/build/usage.json`.
+
+The method is the `tokens` skill. A worked example of it, from another
+product, is
+PDR-0011, in `docs/decisions/`.
+
+## Where to go next
+
+- **`GUIDE.md`** at the repository's root: what every part of this workspace
+  is, in the order you meet it.
+- **Changing something:** the work starts from a brief in `briefs/` and
+  reaches both sides before it merges.

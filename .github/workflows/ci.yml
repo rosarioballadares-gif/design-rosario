@@ -1,0 +1,137 @@
+name: CI
+
+# Runs on the branch where work is integrated, which is also the one that
+# publishes.
+#
+# THIS WORKFLOW GATES ONE THING: THE DEPLOY. A red `check` stops the `deploy`
+# job below, so production stays on the last green build. It cannot gate the
+# merge: work reaches `main` through a local `git merge` that no workflow
+# observes — the run starts on the push afterwards, when the merge already
+# exists — and turning a red run into a blocked merge takes a branch protection
+# rule, which GitHub does not offer on a private repository outside a paid plan.
+#
+# So a red run is a message to whoever reads it, about a `main` that already
+# carries the defect. Read it. `pnpm gate` is what closes the distance, locally,
+# before the push.
+#
+# It used to run on two branches because they answered different questions —
+# what you are about to promote, and whether what deployed was checked. Since
+# 2026-09-24 there is one branch (`dev` was renamed to `main`), so both answers
+# arrive from the same run, after the fact.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      # THE BUILTIN-ONLY CHECKS RUN FIRST, above the install, and that ordering
+      # is a rule rather than a preference: each imports only node builtins and
+      # reads files in this repository, so none of them can fail for a reason
+      # that is not its own. A check placed below an install reports a broken
+      # credential as a problem with its own subject.
+      #
+      # They are also the checks most likely to be needed when something else is
+      # broken — see check:feedback in docs/foundation/checks.md.
+      - name: The two role lists in the setup skill still agree
+        run: node scripts/check-role-list.mjs
+
+      - name: The skills table lists the skills that exist
+        run: node scripts/check-skills-table.mjs
+
+      - name: The standing per-call floor is inside its budget
+        run: node scripts/check-context-floor.mjs
+
+      - name: Every link in CLAUDE.md names a file that exists
+        run: node scripts/check-doc-links.mjs
+
+      - name: Every backlog item carries a state
+        run: node scripts/check-backlog.mjs
+
+      - name: The feedback records name a person, a place and a cost
+        run: node scripts/check-feedback.mjs
+
+      # pnpm ARRIVES THROUGH COREPACK, not through a third-party action, and
+      # the reason is a version rather than a preference: an action given
+      # `version: 10` resolves a RANGE, so the workflow that reports and the
+      # build that blocks the deploy end up eleven minor versions apart with
+      # nothing saying so. `packageManager` in package.json is the one pin.
+      #
+      # Ordering matters: corepack runs AFTER setup-node, so it enables against
+      # the Node this job uses rather than the runner's own.
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+
+      # `build` is `tsc -b && vite build`, so the typecheck runs inside it.
+      - run: pnpm build
+
+      - run: pnpm build:storybook
+
+      # Refuses a brief whose sections carry prose with nothing behind it. It
+      # runs before the suite because it is instant, and because a brief that
+      # hides its unsupported parts is the failure with the longest tail:
+      # everything downstream inherits it.
+      - run: pnpm check:briefs
+
+      - name: The characters the voice guide forbids, over the strings in src/
+        run: pnpm check:copy
+
+      # Read the COUNT, not just the colour. Nothing here mounts a component, so
+      # a green run says the models are well-formed and the checkers do what
+      # they claim — and a file count LOWER than the last run means a spec
+      # failed to import and reported green.
+      - run: pnpm test:run
+
+  # PRODUCTION FOLLOWS `main`. Once `check` is green on a push to `main`, this
+  # uploads the tree, and Vercel builds it with `vercel.json`'s `buildCommand` —
+  # the five publish checks again, then both builds — promoting it only if every
+  # step passes. Vercel's Git integration would do this without a token, but a
+  # Hobby team cannot deploy a private organisation repository.
+  #
+  # A copy of the template has no Vercel project, so the job says so and passes
+  # rather than failing a repository that never chose a deploy. It needs all
+  # three secrets: with a token and no ids, `vercel deploy --yes` links a
+  # project of its own choosing.
+  deploy:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - name: A Vercel project is wired to this repository
+        id: wired
+        run: |
+          if [ -n "$VERCEL_TOKEN" ] && [ -n "$VERCEL_ORG_ID" ] && [ -n "$VERCEL_PROJECT_ID" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy skipped - this repository lacks VERCEL_TOKEN, VERCEL_ORG_ID or VERCEL_PROJECT_ID. The two ids are in .vercel/project.json after vercel link."
+          fi
+
+      - uses: actions/checkout@v5
+        if: steps.wired.outputs.ok == 'true'
+
+      - uses: actions/setup-node@v6
+        if: steps.wired.outputs.ok == 'true'
+        with:
+          node-version: 22
+
+      # Pinned, for the reason pnpm arrives through corepack above: a range
+      # drifts with nothing saying so. 56.3.1 is the first CLI whose `deploy`
+      # takes a project-scoped token (vercel/vercel#16999).
+      - name: Deploy to production
+        if: steps.wired.outputs.ok == 'true'
+        run: npx --yes vercel@56.3.1 deploy --prod --yes --token "$VERCEL_TOKEN"

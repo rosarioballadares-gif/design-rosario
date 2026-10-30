@@ -1,0 +1,9 @@
+/*
+ * The application's own stylesheet. A design system's stylesheet is imported
+ * from `src/ds/index.ts` instead, so this file never names a vendor.
+ */
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}

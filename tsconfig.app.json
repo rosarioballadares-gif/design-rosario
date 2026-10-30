@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "types": ["vite/client"],
+    "allowArbitraryExtensions": true,
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  // `.storybook/**/*` and NOT `.storybook`. TypeScript expands a bare directory
+  // name into a wildcard whose matcher skips any component beginning with a
+  // dot, so the bare name matches zero files while reading as though it covers
+  // them — and the typecheck then passes over a Storybook config that will not
+  // build. Measured with `--listFilesOnly`, design-ops, 2026-09-03.
+  "include": ["src", ".storybook/**/*"],
+  "exclude": ["src/**/*.spec.ts", "src/**/*.spec.tsx"]
+}

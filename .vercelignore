@@ -1,0 +1,15 @@
+# `vercel deploy` uploads the checkout it runs in. What .gitignore keeps out of
+# the repository stays out of the upload too, so the deploy builds the tree a
+# clone would get rather than one person's local state.
+node_modules
+dist
+dist-review
+dist-ssr
+*.local
+*.log
+logs
+.vscode
+.idea
+.claude/profile.local.json
+.claude/worktrees
+.gate-receipt.json
