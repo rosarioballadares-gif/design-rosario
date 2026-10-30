@@ -6,30 +6,44 @@ anything about one person goes in their untracked profile instead. Every fact
 carries a `> SOURCE: who, when`, and every unknown stays a `> GAP:` with the
 name of who would know.
 
-> GAP: no client has been recorded. This is the base, before `/setup` ran.
-
 ## The client
 
-> GAP: who the client is, the product, its URL, and the engagement — and the
-> product key, the PascalCase id the code and `docs/product/<ProductId>/` use.
+There is no external client: this is a personal project of Rosario.
+
+> SOURCE: Rosario, 2026-10-30, question UI
+
+> GAP: the product's name, its URL, and the product key, the PascalCase id the
+> code and `docs/product/<ProductId>/` use. Rosario would know.
 
 ## The design system
 
-> GAP: whether one exists, and where it lives — a package, a design file, a
-> Storybook, or nowhere yet.
+None yet.
+
+> SOURCE: Rosario, 2026-10-30, question UI — "Todavia no"
 
 ## The stack
 
-> GAP: what the client ships on, and whether the prototypes here keep the
-> template's stack.
+> GAP: what the project ships on, and whether the prototypes here keep the
+> template's stack. Rosario answered "I do not know" on 2026-10-30 and would
+> decide.
 
 ## Where the work happens
 
-> GAP: whose repository the code goes to, and where prototypes are published.
+This repository is https://github.com/rosarioballadares-gif/design-rosario.
+
+> SOURCE: Rosario, 2026-10-30, chat
+
+> GAP: whether code goes anywhere else, and where prototypes are published.
+> Rosario would know.
 
 ## The design tool
 
-> GAP: Figma or another tool, the library file, and which account reaches it.
+Figma, reached through the Figma MCP server under the handle Studio Hakuna.
+
+> SOURCE: Rosario, 2026-10-30, question UI; `whoami` run by Claude, 2026-10-30
+
+> GAP: which Figma team this project belongs to, and its library file. Rosario
+> would know.
 
 **More than one Figma server can be connected, and they answer as different
 accounts.** Record which server answered `whoami`, not that one did: composing
@@ -38,17 +52,23 @@ missing seat.
 
 ## The documentation
 
-> GAP: where the client keeps its documentation — a wiki, a drive, a tracker.
+None outside this repository.
+
+> SOURCE: Rosario, 2026-10-30, question UI
 
 ## The tracker
 
-> GAP: Jira, Linear or none, and who files tickets.
+None. Work is tracked in [`backlog/`](../../backlog/README.md).
+
+> SOURCE: Rosario, 2026-10-30, question UI
 
 ## Communication
 
-> GAP: the channel the client is reached in.
+> GAP: the channel the project is coordinated in. Rosario answered "something
+> else" on 2026-10-30 without naming it, and would know.
 
 ## The package registry
 
-> GAP: whether anything installs from a private scope. `pnpm check:env`
-> reports it.
+Nothing installs from a private scope: there is no `.npmrc`.
+
+> SOURCE: `pnpm check:env`, run by Claude, 2026-10-30

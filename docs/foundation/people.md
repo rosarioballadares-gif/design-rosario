@@ -15,6 +15,7 @@ table.
 | Name | Role | Registered | How it is known |
 | --- | --- | --- | --- |
 | Ian Rueff | product-designer, writes code | 2026-09-19 | The author of this template, carried in every copy made from it so a backlog item can name him. Answered `/setup` on 2026-09-19 in the repository the template was cut from, not in this copy. |
+| Rosario | other: graphic, motion and branding designer | 2026-10-30 | Answered `/setup` on 2026-10-30. Whether they write code here is an open question in their profile. |
 
 ## The client's people
 
@@ -25,8 +26,7 @@ blocked backlog item.
 
 | Name | Role at the client | Decides or knows | How to reach | How it is known |
 | --- | --- | --- | --- | --- |
-
-> GAP: no client has been recorded, so nobody at the client is named yet.
+| Rosario | Owner of this personal project | Decides on the design system and knows the product | This repository | Rosario, `/setup`, 2026-10-30 |
 
 ## Who is not on this roster
 

@@ -51,6 +51,6 @@ at.
 ## Related
 
 - [PDR-0011](0011-tokens-three-tiers.md), which this narrows for new clients.
-- [The brief](../../briefs/2026-10-14-component-tier-optional.md).
+- [The brief](../template-history/2026-10-14-component-tier-optional.md).
 
 > SOURCE: Ian Rueff, 2026-10-14

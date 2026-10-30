@@ -62,4 +62,4 @@ maintainer fixes is an issue on the template's repository, never an item here.
 
 > SOURCE: Ian Rueff, 2026-10-09 — "la idea es q este repo este virgen, con
 > todo lo q se pueda presetear preseteado y el resto dentro de setup";
-> [the brief](../briefs/2026-10-09-empty-backlog.md).
+> [the brief](../docs/template-history/2026-10-09-empty-backlog.md).
